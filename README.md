@@ -1,6 +1,6 @@
 # graphics-workshop
 
-_This is a project for learning the basics of computer graphics. The original github repository is ([graphics-workshop(https://github.com/ekzhang/graphics-workshop)])._
+_This is a project for learning the basics of computer graphics. The original github repository is ([graphics-workshop](https://github.com/ekzhang/graphics-workshop))._
 
 _I'm a frontend developer, learnign computer graphics through WebGL and JavaScript is a great way for me to deepen my comprehension._
 
