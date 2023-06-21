@@ -189,6 +189,10 @@ function compileShaders() {
         frag: shaders.quiltFrag,
         vert: shaders.quiltVert,
       }),
+      landscape: regl({
+        frag: shaders.landscapeFrag,
+        vert: shaders.landscapeVert,
+      }),
     };
   } catch {
     return null;
