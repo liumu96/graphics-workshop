@@ -7,6 +7,7 @@ import sphereUrl from "../models/sphere.obj.json?url";
 import suzanneUrl from "../models/suzanne.obj.json?url";
 import teapotUrl from "../models/teapot.obj.json?url";
 import createCamera from "./camera";
+import shaders from "./shaders";
 import { mat4 } from "gl-matrix";
 
 const regl = REGL({
@@ -119,14 +120,14 @@ const common = regl({
   ],
   uniforms: {
     view: () => mat4.lookAt([], camera.eye, camera.center, [0, 1, 0]),
-    projection: ({ drawingBuggerWidth, drawingBufferHeight }) => {
-      const aspectRatio = drawingBuggerWidth / drawingBufferHeight;
+    projection: ({ drawingBufferWidth, drawingBufferHeight }) => {
+      const aspectRatio = drawingBufferWidth / drawingBufferHeight;
       return mat4.perspective([], Math.PI / 6, aspectRatio, 0.01, 100);
     },
     eye: () => camera.eye,
     center: () => camera.center,
-    resolution: ({ drawingBuggerWidth, drawingBufferHeight }) => [
-      drawingBuggerWidth,
+    resolution: ({ drawingBufferWidth, drawingBufferHeight }) => [
+      drawingBufferWidth,
       drawingBufferHeight,
     ],
     time: regl.context("time"),
@@ -182,7 +183,16 @@ const setup = {
 };
 
 function compileShaders() {
-  // todo
+  try {
+    return {
+      quilt: regl({
+        frag: shaders.quiltFrag,
+        vert: shaders.quiltVert,
+      }),
+    };
+  } catch {
+    return null;
+  }
 }
 
 let draw = compileShaders();
@@ -206,4 +216,10 @@ updateMesh(params.mesh).then(() => {
   });
 });
 
-console.log("test");
+// Hot module reloading for shader code
+if (import.meta.hot) {
+  import.meta.hot.accept("./shaders.js", (module) => {
+    Object.assign(shaders, module.default);
+    draw = compileShaders();
+  });
+}
