@@ -6,13 +6,18 @@ import knotUrl from "../models/knot.obj.json?url";
 import sphereUrl from "../models/sphere.obj.json?url";
 import suzanneUrl from "../models/suzanne.obj.json?url";
 import teapotUrl from "../models/teapot.obj.json?url";
+import createCamera from "./camera";
+import { mat4 } from "gl-matrix";
 
 const regl = REGL({
   extensions: ["OES_standard_derivatives"],
 });
 
-// todo camera
-// const camera =
+// camera
+const camera = createCamera(document.getElementsByTagName("canvas")[0], {
+  eye: [1.0, 0.0, 5.2],
+  center: [0, 0, 0],
+});
 
 const params = initPane();
 let mesh = null;
@@ -85,7 +90,6 @@ function initPane() {
     const data = pane.exportPreset();
     localStorage.setItem("graphics-workshop", JSON.stringify(data));
     for (const [input, projects] of inputs) {
-      console.log(projects, "projects");
       input.hidden = !projects.includes(params.project);
     }
   };
@@ -96,7 +100,110 @@ function initPane() {
 }
 
 async function updateMesh(path) {
+  const resp = await fetch(path);
+  mesh = await resp.json();
+}
+
+const common = regl({
+  attributes: {
+    position: [
+      [-1, 1],
+      [-1, -1],
+      [1, 1],
+      [1, -1],
+    ],
+  },
+  elements: [
+    [0, 1, 2],
+    [2, 1, 3],
+  ],
+  uniforms: {
+    view: () => mat4.lookAt([], camera.eye, camera.center, [0, 1, 0]),
+    projection: ({ drawingBuggerWidth, drawingBufferHeight }) => {
+      const aspectRatio = drawingBuggerWidth / drawingBufferHeight;
+      return mat4.perspective([], Math.PI / 6, aspectRatio, 0.01, 100);
+    },
+    eye: () => camera.eye,
+    center: () => camera.center,
+    resolution: ({ drawingBuggerWidth, drawingBufferHeight }) => [
+      drawingBuggerWidth,
+      drawingBufferHeight,
+    ],
+    time: regl.context("time"),
+  },
+});
+
+function toColor(color) {
+  return [color.r / 255, color.g / 255, color.b / 255];
+}
+
+const setup = {
+  quilt: regl({
+    uniforms: {
+      seed: () => params.seed,
+    },
+  }),
+  landscape: regl({
+    uniforms: {
+      seed: () => params.seed,
+      scale: () => params.scale,
+    },
+  }),
+  shading: regl({
+    attributes: {
+      position: () => mesh.vertices,
+      normal: () => mesh.normals,
+    },
+    uniforms: {
+      kd: () => toColor(params.kd),
+      ks: () => toColor(params.ks),
+      shininess: () => params.shininess,
+    },
+    elements: () => mesh.elements,
+  }),
+  contours: regl({
+    attributes: {
+      position: () => mesh.vertices,
+      normal: () => mesh.normals,
+    },
+    uniforms: {
+      kd: () => toColor(params.kd),
+      ks: () => toColor(params.ks),
+      shininess: () => params.shininess,
+    },
+    elements: () => mesh.elements,
+  }),
+  raytracing: regl({
+    uniforms: {
+      background: () => toColor(params.background),
+      antialias: () => params.antialias,
+    },
+  }),
+};
+
+function compileShaders() {
   // todo
 }
+
+let draw = compileShaders();
+
+updateMesh(params.mesh).then(() => {
+  const frameTimes = [...Array(60)].fill(0);
+  regl.frame(() => {
+    const lastTime = frameTimes.shift();
+    const time = performance.now();
+    frameTimes.push(time);
+    if (lastTime !== 0) {
+      params.fps = 1000 / ((time - lastTime) / frameTimes.length);
+    }
+    common(() => {
+      if (params.project === "contours") regl.clear({ color: [1, 1, 1, 1] });
+      else regl.clear({ color: [0, 0, 0, 1] });
+      setup[params.project](() => {
+        if (draw) draw[params.project]();
+      });
+    });
+  });
+});
 
 console.log("test");
