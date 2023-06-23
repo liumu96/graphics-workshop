@@ -193,6 +193,10 @@ function compileShaders() {
         frag: shaders.landscapeFrag,
         vert: shaders.landscapeVert,
       }),
+      shading: regl({
+        frag: shaders.shadingFrag,
+        vert: shaders.shadingVert,
+      }),
     };
   } catch {
     return null;
