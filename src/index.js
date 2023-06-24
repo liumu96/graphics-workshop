@@ -197,6 +197,10 @@ function compileShaders() {
         frag: shaders.shadingFrag,
         vert: shaders.shadingVert,
       }),
+      contours: regl({
+        frag: shaders.contoursFrag,
+        vert: shaders.contoursVert,
+      }),
       raytracing: regl({
         frag: shaders.raytracingFrag,
         vert: shaders.raytracingVert,
