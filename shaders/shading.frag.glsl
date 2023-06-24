@@ -19,19 +19,26 @@ vec3 illuminate(vec3 lightPosition) {
     // - Compute the unit vector wo from the current position to the
     //   camera, by subtracting vPosition from eye and calling
     //   normalize().
+    vec3 wo = normalize(eye - vPosition);
     // - Compute the reflected incident light vector r, by reflecting
     //   normalize(wi) about normalize(vNormal) using the reflect()
     //   function.
+    vec3 r = -reflect(normalize(wi), normalize(vNormal));
     // - Take the dot product of r and wo, then raise this to the
     //   exponent of the shininess coefficient. (Make sure your
     //   result is not negative!)
+    float specItem = max(dot(r, wo), 0.0);
     // - Multiply the result by specular coefficient ks.
+    vec3 specular = ks * pow(specItem, shininess);
+    
+    
+   
 
-    vec3 wo = vPosition - eye;
-    vec3 r = reflect(wo, vPosition);
-    float specAngle = max(dot(normalize(wo), normalize(r)), 0.0);
+    // vec3 wo = vPosition - eye;
+    // vec3 r = reflect(wo, vPosition);
+    // float specAngle = max(dot(normalize(wo), normalize(r)), 0.0);
 
-    vec3 specular = ks * pow(specAngle, shininess); // todo
+    // vec3 specular = ks * pow(specAngle, shininess); // todo
 
     return intensity * (diffuse + specular);
 }
