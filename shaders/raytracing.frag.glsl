@@ -87,10 +87,19 @@ vec3 illuminate(vec3 lightPosition, vec3 pos, vec3 wo, Hit h) {
     if (h.material.checker) {
         // Checkerboard pattern for the floor
         vec2 coords = floor(pos.xz);
-        kd = vec3(mod(coords.x + coords.y, 2.0) * 0.8 + 0.2);
+        kd = vec3(mod(coords.x + coords.y, 2.0) * 0.8 + 0.2); // 0.2 or 1.0
     }
-    float intensity = 1.0 / dot(wi, wi); // inverse-square law
-    vec3 diffuse = kd * max(dot(normalize(wi), h.normal), 0.0);
+    float intensity = 1.0 / dot(wi, wi); // inverse-square law 1 / r^2
+    vec3 diffuse = kd * max(dot(normalize(wi), h.normal), 0.0); 
+
+    // checking if the point lies in the shadow of the light
+    vec3 light_dir = normalize(lightPosition - pos);
+    Hit shadowHit = intersect(Ray(pos, light_dir));
+    vec3 shadowPos = pos + light_dir * shadowHit.time;
+    if (shadowHit.time != inf && length(shadowPos - pos) < length(lightPosition - pos)) {
+        return vec3(0.0);
+    }
+    
 
     // Non-dielectric materials have tinted reflections
     vec3 ks = h.material.metal ? h.material.kd : h.material.ks;
