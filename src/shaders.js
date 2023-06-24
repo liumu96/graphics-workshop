@@ -4,6 +4,8 @@ import landscapeFrag from "../shaders/landscape.frag.glsl?raw";
 import landscapeVert from "../shaders/landscape.vert.glsl?raw";
 import shadingFrag from "../shaders/shading.frag.glsl?raw";
 import shadingVert from "../shaders/shading.vert.glsl?raw";
+import raytracingFrag from "../shaders/raytracing.frag.glsl?raw";
+import raytracingVert from "../shaders/raytracing.vert.glsl?raw";
 
 const shaders = {
   quiltFrag,
@@ -12,6 +14,8 @@ const shaders = {
   landscapeVert,
   shadingFrag,
   shadingVert,
+  raytracingFrag,
+  raytracingVert,
 };
 
 export default shaders;

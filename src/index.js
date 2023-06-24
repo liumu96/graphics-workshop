@@ -197,6 +197,10 @@ function compileShaders() {
         frag: shaders.shadingFrag,
         vert: shaders.shadingVert,
       }),
+      raytracing: regl({
+        frag: shaders.raytracingFrag,
+        vert: shaders.raytracingVert,
+      }),
     };
   } catch {
     return null;
